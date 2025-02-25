@@ -1,20 +1,18 @@
-use std::io;
+use std::io::{self, Stdout};
 
 use crossterm::{
-    cursor::MoveTo,
-    event::{self, Event, KeyCode, KeyModifiers},
-    execute,
-    terminal::{Clear, ClearType, disable_raw_mode, enable_raw_mode},
+    event::{KeyCode, KeyModifiers},
+    terminal::{disable_raw_mode, enable_raw_mode},
 };
 
 use crate::terminal::Terminal;
 
-pub struct Editor {
+pub struct Editor<W: io::Write> {
     should_quit: bool,
-    terminal: Terminal,
+    terminal: Terminal<W>,
 }
 
-impl Default for Editor {
+impl Default for Editor<Stdout> {
     fn default() -> Self {
         let terminal = Terminal::defauilt().unwrap();
         Self {
@@ -24,7 +22,7 @@ impl Default for Editor {
     }
 }
 
-impl Editor {
+impl<W: io::Write> Editor<W> {
     pub fn run(&mut self) -> io::Result<()> {
         enable_raw_mode()?;
         loop {
@@ -42,22 +40,21 @@ impl Editor {
             println!("~\r");
         }
     }
-    fn refresh_screen(&self) -> io::Result<()> {
-        execute!(io::stdout(), Clear(ClearType::FromCursorUp), MoveTo(0, 0))?;
+    fn refresh_screen(&mut self) -> io::Result<()> {
+        self.terminal.clear_screen()?;
+        self.terminal.cursor_position(0, 0)?;
         if self.should_quit {
             println!("Good bye.\r");
         } else {
             self.draw_rows();
-            execute!(io::stdout(), MoveTo(1, 0))?;
+            self.terminal.cursor_position(0, 0)?;
         }
         Ok(())
     }
     fn process_keypress(&mut self) -> io::Result<()> {
-        let press_key = event::read()?;
-        if let Event::Key(k) = press_key {
-            if k.code == KeyCode::Char('q') && k.modifiers.contains(KeyModifiers::CONTROL) {
-                self.should_quit = true;
-            }
+        let key = Terminal::<W>::read_key()?;
+        if key.code == KeyCode::Char('q') && key.modifiers.contains(KeyModifiers::CONTROL) {
+            self.should_quit = true;
         }
         Ok(())
     }
