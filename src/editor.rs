@@ -7,9 +7,21 @@ use crossterm::{
     terminal::{Clear, ClearType, disable_raw_mode, enable_raw_mode},
 };
 
-#[derive(Default)]
+use crate::terminal::Terminal;
+
 pub struct Editor {
     should_quit: bool,
+    terminal: Terminal,
+}
+
+impl Default for Editor {
+    fn default() -> Self {
+        let terminal = Terminal::defauilt().unwrap();
+        Self {
+            should_quit: false,
+            terminal,
+        }
+    }
 }
 
 impl Editor {
@@ -26,7 +38,7 @@ impl Editor {
         Ok(())
     }
     fn draw_rows(&self) {
-        for _ in 0..23 {
+        for _ in 0..self.terminal.size().height {
             println!("~\r");
         }
     }
