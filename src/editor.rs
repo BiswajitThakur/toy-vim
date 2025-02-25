@@ -6,22 +6,25 @@ use crossterm::{
 };
 
 #[derive(Default)]
-pub struct Editor {}
+pub struct Editor {
+    should_quit: bool,
+}
 
 impl Editor {
-    pub fn run(&self) -> io::Result<()> {
+    pub fn run(&mut self) -> io::Result<()> {
         enable_raw_mode()?;
-        loop {
+        while !self.should_quit {
             self.process_keypress()?;
         }
+        disable_raw_mode()?;
+        Ok(())
     }
-    fn process_keypress(&self) -> io::Result<()> {
+    fn process_keypress(&mut self) -> io::Result<()> {
         let press_key = event::read()?;
         if let Event::Key(k) = press_key {
             println!("{:?}", k);
             if k.code == KeyCode::Char('q') && k.modifiers.contains(KeyModifiers::CONTROL) {
-                disable_raw_mode()?;
-                std::process::exit(0);
+                self.should_quit = true;
             }
         }
         Ok(())
