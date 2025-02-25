@@ -31,8 +31,14 @@ impl<W: io::Write> Terminal<W> {
     pub fn size(&self) -> &Size {
         &self.size
     }
+    pub fn stdout(&mut self) -> &mut W {
+        &mut self.stdout
+    }
     pub fn clear_screen(&mut self) -> io::Result<()> {
-        execute!(self.stdout, Clear(ClearType::FromCursorUp))
+        execute!(self.stdout, Clear(ClearType::All))
+    }
+    pub fn clear_current_line(&mut self) -> io::Result<()> {
+        execute!(self.stdout, Clear(ClearType::CurrentLine))
     }
     pub fn cursor_position(&mut self, x: u16, y: u16) -> io::Result<()> {
         let x = x.saturating_add(1);

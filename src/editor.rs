@@ -35,19 +35,22 @@ impl<W: io::Write> Editor<W> {
         disable_raw_mode()?;
         Ok(())
     }
-    fn draw_rows(&self) {
+    fn draw_rows(&mut self) -> io::Result<()> {
         for _ in 0..self.terminal.size().height - 1 {
-            println!("~\r");
+            self.terminal.clear_current_line()?;
+            writeln!(self.terminal.stdout(), "~\r")?;
         }
+        Ok(())
     }
     fn refresh_screen(&mut self) -> io::Result<()> {
         self.terminal.cursor_hide()?;
         self.terminal.clear_screen()?;
         self.terminal.cursor_position(0, 0)?;
         if self.should_quit {
+            self.terminal.clear_screen()?;
             println!("Good bye.\r");
         } else {
-            self.draw_rows();
+            self.draw_rows()?;
             self.terminal.cursor_position(1, 0)?;
         }
         self.terminal.cursor_show()?;
