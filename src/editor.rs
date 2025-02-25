@@ -2,7 +2,8 @@ use std::io;
 
 use crossterm::{
     event::{self, Event, KeyCode, KeyModifiers},
-    terminal::{disable_raw_mode, enable_raw_mode},
+    execute,
+    terminal::{Clear, ClearType, disable_raw_mode, enable_raw_mode},
 };
 
 #[derive(Default)]
@@ -14,10 +15,14 @@ impl Editor {
     pub fn run(&mut self) -> io::Result<()> {
         enable_raw_mode()?;
         while !self.should_quit {
+            self.refresh_screen()?;
             self.process_keypress()?;
         }
         disable_raw_mode()?;
         Ok(())
+    }
+    fn refresh_screen(&self) -> io::Result<()> {
+        execute!(io::stdout(), Clear(ClearType::FromCursorUp))
     }
     fn process_keypress(&mut self) -> io::Result<()> {
         let press_key = event::read()?;
