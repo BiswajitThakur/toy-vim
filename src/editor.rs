@@ -1,6 +1,7 @@
 use std::io;
 
 use crossterm::{
+    cursor::MoveTo,
     event::{self, Event, KeyCode, KeyModifiers},
     execute,
     terminal::{Clear, ClearType, disable_raw_mode, enable_raw_mode},
@@ -22,7 +23,7 @@ impl Editor {
         Ok(())
     }
     fn refresh_screen(&self) -> io::Result<()> {
-        execute!(io::stdout(), Clear(ClearType::FromCursorUp))
+        execute!(io::stdout(), Clear(ClearType::FromCursorUp), MoveTo(1, 1))
     }
     fn process_keypress(&mut self) -> io::Result<()> {
         let press_key = event::read()?;
