@@ -15,20 +15,34 @@ pub struct Editor {
 impl Editor {
     pub fn run(&mut self) -> io::Result<()> {
         enable_raw_mode()?;
-        while !self.should_quit {
+        loop {
             self.refresh_screen()?;
+            if self.should_quit {
+                break;
+            }
             self.process_keypress()?;
         }
         disable_raw_mode()?;
         Ok(())
     }
+    fn draw_rows(&self) {
+        for _ in 0..23 {
+            println!("~\r");
+        }
+    }
     fn refresh_screen(&self) -> io::Result<()> {
-        execute!(io::stdout(), Clear(ClearType::FromCursorUp), MoveTo(1, 1))
+        execute!(io::stdout(), Clear(ClearType::FromCursorUp), MoveTo(0, 0))?;
+        if self.should_quit {
+            println!("Good bye.\r");
+        } else {
+            self.draw_rows();
+            execute!(io::stdout(), MoveTo(1, 0))?;
+        }
+        Ok(())
     }
     fn process_keypress(&mut self) -> io::Result<()> {
         let press_key = event::read()?;
         if let Event::Key(k) = press_key {
-            println!("{:?}", k);
             if k.code == KeyCode::Char('q') && k.modifiers.contains(KeyModifiers::CONTROL) {
                 self.should_quit = true;
             }
