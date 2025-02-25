@@ -13,9 +13,15 @@ fn main() {
         if c.is_control() {
             println!("{:?} \r", b);
         } else {
-            println!()
+            println!("{:?} ({})\r", b, c);
         }
-        println!("{:?} ({})\r", b, c);
+        if to_ctrl_byte(b'q') == b {
+            break;
+        }
     }
     disable_raw_mode().unwrap();
+}
+
+fn to_ctrl_byte(c: u8) -> u8 {
+    c & 0b0001_1111
 }
