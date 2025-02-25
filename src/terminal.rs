@@ -1,7 +1,7 @@
 use std::io::{self, Stdout};
 
 use crossterm::{
-    cursor::MoveTo,
+    cursor::{self, MoveTo},
     event::{self, Event, KeyEvent},
     execute,
     terminal::{Clear, ClearType},
@@ -39,11 +39,17 @@ impl<W: io::Write> Terminal<W> {
         let y = y.saturating_add(1);
         execute!(self.stdout, MoveTo(x, y))
     }
+    pub fn cursor_hide(&mut self) -> io::Result<()> {
+        execute!(self.stdout, cursor::Hide)
+    }
     pub fn read_key() -> io::Result<KeyEvent> {
         loop {
             if let Event::Key(k) = event::read()? {
                 return Ok(k);
             }
         }
+    }
+    pub fn cursor_show(&mut self) -> io::Result<()> {
+        execute!(self.stdout, cursor::Show)
     }
 }
