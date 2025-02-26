@@ -42,11 +42,7 @@ impl<W: io::Write> Editor<W> {
         for row in 0..self.terminal.size().height - 1 {
             self.terminal.clear_current_line()?;
             if row == height / 3 {
-                writeln!(
-                    self.terminal.stdout(),
-                    "Hecto editor -- version {}\r",
-                    VERSION
-                )?;
+                self.draw_welcome_msg()?;
             } else {
                 writeln!(self.terminal.stdout(), "~\r")?;
             }
@@ -73,5 +69,15 @@ impl<W: io::Write> Editor<W> {
             self.should_quit = true;
         }
         Ok(())
+    }
+    fn draw_welcome_msg(&mut self) -> io::Result<()> {
+        let mut welcome_message = format!("Hecto editor -- version {}", VERSION);
+        let width = self.terminal.size().width as usize;
+        let len = welcome_message.len();
+        let padding = width.saturating_sub(len) / 2;
+        let spaces = " ".repeat(padding.saturating_sub(1));
+        welcome_message = format!("~{}{}", spaces, welcome_message);
+        welcome_message.truncate(width);
+        writeln!(self.terminal.stdout(), "{}\r", welcome_message)
     }
 }
