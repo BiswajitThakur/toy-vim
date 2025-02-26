@@ -8,10 +8,15 @@ use crossterm::{
 use crate::terminal::Terminal;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
-
+#[derive(Default)]
+struct Position {
+    x: usize,
+    y: usize,
+}
 pub struct Editor<W: io::Write> {
     should_quit: bool,
     terminal: Terminal<W>,
+    cursor_position: Position,
 }
 
 impl Default for Editor<Stdout> {
@@ -20,6 +25,7 @@ impl Default for Editor<Stdout> {
         Self {
             should_quit: false,
             terminal,
+            cursor_position: Position::default(),
         }
     }
 }
