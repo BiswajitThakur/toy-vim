@@ -5,14 +5,10 @@ use crossterm::{
     terminal::{disable_raw_mode, enable_raw_mode},
 };
 
-use crate::terminal::Terminal;
+use crate::terminal::{Position, Terminal};
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
-#[derive(Default)]
-struct Position {
-    x: usize,
-    y: usize,
-}
+
 pub struct Editor<W: io::Write> {
     should_quit: bool,
     terminal: Terminal<W>,
@@ -58,13 +54,13 @@ impl<W: io::Write> Editor<W> {
     fn refresh_screen(&mut self) -> io::Result<()> {
         self.terminal.cursor_hide()?;
         self.terminal.clear_screen()?;
-        self.terminal.cursor_position(0, 0)?;
+        self.terminal.cursor_position(Position { x: 0, y: 0 })?;
         if self.should_quit {
             self.terminal.clear_screen()?;
             println!("Good bye.\r");
         } else {
             self.draw_rows()?;
-            self.terminal.cursor_position(1, 0)?;
+            self.terminal.cursor_position(Position { x: 1, y: 0 })?;
         }
         self.terminal.cursor_show()?;
         Ok(())

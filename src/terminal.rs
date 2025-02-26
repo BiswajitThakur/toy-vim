@@ -6,6 +6,17 @@ use crossterm::{
     execute,
     terminal::{Clear, ClearType},
 };
+#[derive(Default)]
+pub struct Position {
+    pub x: u16,
+    pub y: u16,
+}
+
+impl AsRef<Position> for Position {
+    fn as_ref(&self) -> &Self {
+        self
+    }
+}
 
 pub struct Size {
     pub width: u16,
@@ -40,7 +51,8 @@ impl<W: io::Write> Terminal<W> {
     pub fn clear_current_line(&mut self) -> io::Result<()> {
         execute!(self.stdout, Clear(ClearType::CurrentLine))
     }
-    pub fn cursor_position(&mut self, x: u16, y: u16) -> io::Result<()> {
+    pub fn cursor_position<T: AsRef<Position>>(&mut self, pos: T) -> io::Result<()> {
+        let &Position { x, y } = pos.as_ref();
         let x = x.saturating_add(1);
         let y = y.saturating_add(1);
         execute!(self.stdout, MoveTo(x, y))
