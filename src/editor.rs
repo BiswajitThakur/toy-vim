@@ -7,6 +7,8 @@ use crossterm::{
 
 use crate::terminal::Terminal;
 
+const VERSION: &str = env!("CARGO_PKG_VERSION");
+
 pub struct Editor<W: io::Write> {
     should_quit: bool,
     terminal: Terminal<W>,
@@ -36,9 +38,18 @@ impl<W: io::Write> Editor<W> {
         Ok(())
     }
     fn draw_rows(&mut self) -> io::Result<()> {
-        for _ in 0..self.terminal.size().height - 1 {
+        let height = self.terminal.size().height;
+        for row in 0..self.terminal.size().height - 1 {
             self.terminal.clear_current_line()?;
-            writeln!(self.terminal.stdout(), "~\r")?;
+            if row == height / 3 {
+                writeln!(
+                    self.terminal.stdout(),
+                    "Hecto editor -- version {}\r",
+                    VERSION
+                )?;
+            } else {
+                writeln!(self.terminal.stdout(), "~\r")?;
+            }
         }
         Ok(())
     }
